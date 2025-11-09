@@ -86,7 +86,7 @@ export default function Home() {
   };
 
   const handleDelete = async (id: string) => {
-    toast('Are you sure you want to delete this task?', {
+    const toastId = toast('Are you sure you want to delete this task?', {
       action: {
         label: 'Delete',
         onClick: async () => {
@@ -104,11 +104,18 @@ export default function Home() {
           } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
             toast.error(errorMessage);
+          } finally {
+            // Opcional: Cierra el toast de confirmación después de la acción
+            toast.dismiss(toastId);
           }
         },
       },
       cancel: {
         label: 'Cancel',
+        onClick: () => {
+          // Cierra el toast de confirmación sin hacer nada más
+          toast.dismiss(toastId);
+        },
       },
     });
   };
