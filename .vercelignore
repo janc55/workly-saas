@@ -1,0 +1,14 @@
+# Folders
+.next/
+node_modules/
+prisma/dev.db
+
+# Files
+.env.local
+.env
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+.vercel/
