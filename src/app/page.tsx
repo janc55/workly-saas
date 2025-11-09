@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import TaskList from '../components/TaskList';
 import TaskForm from '../components/TaskForm';
 import { Task } from '../types';
+import { toast } from 'sonner';
+
+type TaskFormValues = {
+  title: string;
+  description?: string | undefined;
+};
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -25,30 +31,33 @@ export default function Home() {
       const data = await res.json();
       setTasks(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateTask = async (title: string, description: string) => {
+  const handleCreateTask = async (values: TaskFormValues) => {
     try {
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title, description }),
+        body: JSON.stringify(values),
       });
       if (res.ok) {
         await fetchTasks();
-        alert('Task created successfully!');
+        toast.success('Task created successfully!');
       } else {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to create task');
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'An unknown error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      toast.error(errorMessage);
     }
   };
 
@@ -63,41 +72,53 @@ export default function Home() {
       });
       if (res.ok) {
         await fetchTasks();
-        alert('Task updated successfully!');
+        toast.success('Task updated successfully!');
       } else {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to update task');
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'An unknown error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      toast.error(errorMessage);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      try {
-        const res = await fetch(`/api/tasks/${id}`, {
-          method: 'DELETE',
-        });
-        if (res.ok) {
-          await fetchTasks();
-          alert('Task deleted successfully!');
-        } else {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Failed to delete task');
-        }
-      } catch (err) {
-        alert(err instanceof Error ? err.message : 'An unknown error occurred');
-      }
-    }
+    toast('Are you sure you want to delete this task?', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            const res = await fetch(`/api/tasks/${id}`, {
+              method: 'DELETE',
+            });
+            if (res.ok) {
+              await fetchTasks();
+              toast.success('Task deleted successfully!');
+            } else {
+              const errorData = await res.json();
+              throw new Error(errorData.error || 'Failed to delete task');
+            }
+          } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+            toast.error(errorMessage);
+          }
+        },
+      },
+      cancel: {
+        label: 'Cancel',
+      },
+    });
   };
 
   return (
     <main className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Task Manager</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Task Manager</h1>
+      </div>
       <TaskForm onSubmit={handleCreateTask} />
       {loading && <p>Loading tasks...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500">Error: {error}</p>}
       {!loading && !error && (
         <TaskList tasks={tasks} onUpdateStatus={handleUpdateStatus} onDelete={handleDelete} />
       )}

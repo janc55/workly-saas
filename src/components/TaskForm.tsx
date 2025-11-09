@@ -1,57 +1,77 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+const formSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required' }),
+  description: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface TaskFormProps {
-  onSubmit: (title: string, description: string) => void;
+  onSubmit: (values: FormValues) => void;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ onSubmit }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+    },
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title) {
-      alert('Title is required');
-      return;
-    }
-    onSubmit(title, description);
-    setTitle('');
-    setDescription('');
+  const handleFormSubmit = (values: FormValues) => {
+    onSubmit(values);
+    form.reset();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border rounded shadow-md mb-4">
-      <div className="mb-4">
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-          Title
-        </label>
-        <input
-          type="text"
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-        />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description
-        </label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          rows={3}
-        ></textarea>
-      </div>
-      <button
-        type="submit"
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Create Task
-      </button>
-    </form>
+    <Card className="mb-4">
+      <CardHeader>
+        <CardTitle>Create a new task</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter a title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter a description (optional)" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Create Task</Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 
