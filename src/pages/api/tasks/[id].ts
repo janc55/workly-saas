@@ -1,8 +1,23 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../../../lib/db';
 import { TaskStatus } from '@prisma/client';
+import { z } from 'zod';
+
+// Placeholder for a function that would get the current user
+const getCurrentUser = async (req: NextApiRequest) => {
+  return { id: 'clerk-user-id', role: 'ADMIN' };
+};
+
+const updateTaskSchema = z.object({
+  status: z.nativeEnum(TaskStatus),
+});
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const user = await getCurrentUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const { id } = req.query;
 
   if (typeof id !== 'string') {
@@ -12,10 +27,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   switch (req.method) {
     case 'PUT':
       try {
-        const { status } = req.body;
-        if (!status || !Object.values(TaskStatus).includes(status)) {
-          return res.status(400).json({ error: 'Invalid status' });
+        const validation = updateTaskSchema.safeParse(req.body);
+        if (!validation.success) {
+          return res.status(400).json({ error: validation.error.errors });
         }
+
+        const { status } = validation.data;
+
         const task = await prisma.task.update({
           where: { id },
           data: { status },
@@ -27,6 +45,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       break;
     case 'DELETE':
       try {
+        // In a real app, you might want to check if the user has permission to delete.
+        // e.g., if (user.role !== 'ADMIN') { return res.status(403).json({ error: 'Forbidden' }); }
         await prisma.task.delete({
           where: { id },
         });
