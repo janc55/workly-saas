@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import TaskList from '../components/TaskList';
 import TaskForm from '../components/TaskForm';
 import { Task } from '../types';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 type TaskFormValues = {
   title: string;
@@ -115,6 +117,14 @@ export default function Home() {
     <main className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Task Manager</h1>
+        <div className="flex items-center space-x-2">
+          <Button asChild variant="outline">
+            <Link href="/login">Login</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/register">Sign Up</Link>
+          </Button>
+        </div>
       </div>
       <TaskForm onSubmit={handleCreateTask} />
       {loading && <p>Loading tasks...</p>}
