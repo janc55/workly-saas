@@ -34,7 +34,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const validation = createTaskSchema.safeParse(req.body);
         if (!validation.success) {
-          return res.status(400).json({ error: validation.error.errors });
+          // Fix: Usa .format() para errores formateados por campo
+          return res.status(400).json({ 
+            error: validation.error.format() 
+            // Alternativa: { error: validation.error.issues } para array de issues
+          });
         }
 
         const { title, description } = validation.data;
