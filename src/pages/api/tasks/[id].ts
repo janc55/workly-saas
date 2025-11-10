@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../../lib/db';
+import prisma from '../../../../lib/db';
 import { TaskStatus } from '@prisma/client';
 import { z } from 'zod';
 

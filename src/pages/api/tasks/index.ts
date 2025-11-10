@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../../lib/db';
+import prisma from '../../../../lib/db';
 import { z } from 'zod';
 
 // Placeholder for a function that would get the current user
