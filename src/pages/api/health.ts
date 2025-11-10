@@ -9,8 +9,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Verificar variables de entorno
     const hasPostgresUrl = !!process.env.POSTGRES_PRISMA_URL;
-    const hasDirectUrl = !!process.env.POSTGRES_URL_NON_POOLING;
     const nodeEnv = process.env.NODE_ENV;
+    // Verificar formato de URL (sin mostrar credenciales)
+    const urlPreview = process.env.POSTGRES_PRISMA_URL 
+      ? process.env.POSTGRES_PRISMA_URL.substring(0, 20) + '...'
+      : 'not set';
 
     // Intentar conectar a la base de datos
     // Nota: No llamamos $disconnect() en serverless para reutilizar conexiones
@@ -23,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       environment: {
         nodeEnv,
         hasPostgresUrl,
-        hasDirectUrl,
+        urlPreview,
       },
     });
   } catch (error) {
@@ -36,7 +39,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       environment: {
         nodeEnv: process.env.NODE_ENV,
         hasPostgresUrl: !!process.env.POSTGRES_PRISMA_URL,
-        hasDirectUrl: !!process.env.POSTGRES_URL_NON_POOLING,
+        urlPreview: process.env.POSTGRES_PRISMA_URL 
+          ? process.env.POSTGRES_PRISMA_URL.substring(0, 20) + '...'
+          : 'not set',
       },
       details: process.env.NODE_ENV === 'development' ? String(error) : undefined,
     });

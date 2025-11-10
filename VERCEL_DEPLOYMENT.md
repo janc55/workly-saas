@@ -2,10 +2,11 @@
 
 ## Variables de Entorno Requeridas
 
-Asegúrate de que las siguientes variables de entorno estén configuradas en Vercel:
+Asegúrate de que la siguiente variable de entorno esté configurada en Vercel:
 
 1. **POSTGRES_PRISMA_URL** - URL de conexión con connection pooling (requerida)
-2. **POSTGRES_URL_NON_POOLING** - URL de conexión directa sin pooling (requerida)
+
+**Nota:** Solo necesitas `POSTGRES_PRISMA_URL`. No uses `directUrl` en el schema cuando trabajas con Vercel Postgres directamente, ya que Prisma interpretará que estás usando Prisma Data Proxy y esperará URLs con formato `prisma://`.
 
 ### Configuración en Vercel
 
@@ -61,11 +62,11 @@ npx prisma migrate deploy
 
 **Solución:** Ya implementada en `lib/db.ts` usando el patrón singleton.
 
-### 4. Timeouts de conexión
+### 4. Error: "the URL must start with the protocol `prisma://`"
 
-**Causa:** Connection pooling no configurado correctamente.
+**Causa:** Se está usando `directUrl` en el schema.prisma, lo que hace que Prisma espere URLs de Prisma Data Proxy.
 
-**Solución:** Asegúrate de usar `POSTGRES_PRISMA_URL` (con pooling) para las operaciones normales y `POSTGRES_URL_NON_POOLING` solo para migraciones.
+**Solución:** Elimina `directUrl` del datasource en `schema.prisma` y usa solo `url = env("POSTGRES_PRISMA_URL")`. Vercel Postgres proporciona URLs estándar de PostgreSQL que funcionan directamente sin necesidad de `directUrl`.
 
 ## Endpoint de Diagnóstico
 
