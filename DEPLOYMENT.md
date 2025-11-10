@@ -13,17 +13,17 @@ Esta guía detalla los pasos para desplegar la aplicación Workly SaaS en Vercel
     *   **Root Directory:** Asegúrate de que el "Root Directory" sea la raíz de tu proyecto (donde se encuentra `package.json`).
     *   **Build and Output Settings:** Vercel debería detectar `next build` y `next start` automáticamente. No deberías necesitar cambiar esto.
 
-## 2. Configuración Básica de Variables de Entorno
+## 2. Configuración de Variables de Entorno
 
-Para este proyecto, la base de datos SQLite (`dev.db`) se incluye en el repositorio y se configura directamente en `prisma/schema.prisma` y `prisma.config.ts` con una ruta relativa. Por lo tanto, **no se requieren variables de entorno específicas para la conexión a la base de datos en Vercel** en este momento.
+Este proyecto ahora utiliza PostgreSQL con Supabase para el almacenamiento de datos. Es necesario configurar la variable de entorno `DATABASE_URL` en Vercel.
 
-Sin embargo, en un entorno de producción real, se recomienda encarecidamente usar una base de datos externa (como PostgreSQL, MySQL, MongoDB) y configurar la variable de entorno `DATABASE_URL` en Vercel.
-
-**Pasos para añadir variables de entorno (si fueran necesarias en el futuro):**
+**Pasos para configurar la variable de entorno:**
 
 1.  En la configuración de tu proyecto en Vercel, ve a la pestaña "Settings".
 2.  Haz clic en "Environment Variables".
-3.  Añade las variables necesarias (por ejemplo, `DATABASE_URL` con la cadena de conexión a tu base de datos de producción). Asegúrate de que estén disponibles para los entornos de "Production", "Preview" y "Development".
+3.  Añade la variable `DATABASE_URL` con la cadena de conexión a tu base de datos de Supabase (por ejemplo: `postgresql://postgres:tu_contraseña@db.tu-proyecto.supabase.co:5432/postgres`).
+4.  Asegúrate de que esté disponible para los entornos de "Production", "Preview" y "Development".
+5.  La variable ya debe estar configurada en tu archivo `.env` local para desarrollo.
 
 ## 3. Activar Despliegues Automáticos
 
@@ -52,8 +52,12 @@ Después de un despliegue exitoso:
     *   Para crear una tarea: `POST https://your-project-name.vercel.app/api/tasks` con un cuerpo JSON `{ "title": "Test Task", "description": "Deployed task" }`.
     *   Asegúrate de que las operaciones CRUD funcionen como se espera.
 
-**Consideraciones para SQLite en Vercel:**
+**Notas sobre PostgreSQL y Supabase:**
 
-Dado que SQLite es una base de datos basada en archivos, el archivo `dev.db` se desplegará con tu aplicación. Sin embargo, **Vercel tiene un sistema de archivos inmutable para las funciones Serverless**. Esto significa que cualquier cambio que hagas en `dev.db` (crear, actualizar, eliminar tareas) **no será persistente** entre diferentes invocaciones de funciones o despliegues. Cada nueva invocación de una función Serverless podría obtener una versión "limpia" de la base de datos del momento del despliegue.
+Este proyecto ahora utiliza PostgreSQL con Supabase, lo que proporciona:
+- Persistencia completa de datos en producción
+- Escalabilidad y rendimiento optimizado
+- Backup automático de datos
+- Acceso desde múltiples instancias sin problemas de concurrencia
 
-Para una aplicación de producción con persistencia de datos, se recomienda encarecidamente migrar a una base de datos externa (como PostgreSQL en Vercel Postgres, Supabase, Neon, etc.) y configurar la `DATABASE_URL` correspondiente.
+La migración de SQLite a PostgreSQL ha sido completada y la aplicación está lista para producción.

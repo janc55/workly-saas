@@ -1,7 +1,6 @@
 # Folders
 .next/
 node_modules/
-prisma/dev.db
 
 # Files
 .env.local
