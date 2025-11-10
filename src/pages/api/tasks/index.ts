@@ -27,7 +27,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const tasks = await prisma.task.findMany();
         res.status(200).json(tasks);
       } catch (error) {
-        res.status(500).json({ error: 'Error fetching tasks' });
+        console.error('Error fetching tasks:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error fetching tasks';
+        res.status(500).json({ 
+          error: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        });
       }
       break;
     case 'POST':
@@ -51,7 +56,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         res.status(201).json(task);
       } catch (error) {
-        res.status(500).json({ error: 'Error creating task' });
+        console.error('Error creating task:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error creating task';
+        res.status(500).json({ 
+          error: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        });
       }
       break;
     default:

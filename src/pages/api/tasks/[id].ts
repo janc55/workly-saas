@@ -44,7 +44,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         res.status(200).json(task);
       } catch (error) {
-        res.status(500).json({ error: 'Error updating task' });
+        console.error('Error updating task:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error updating task';
+        res.status(500).json({ 
+          error: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        });
       }
       break;
     case 'DELETE':
@@ -56,7 +61,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         res.status(204).end();
       } catch (error) {
-        res.status(500).json({ error: 'Error deleting task' });
+        console.error('Error deleting task:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error deleting task';
+        res.status(500).json({ 
+          error: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        });
       }
       break;
     default:
